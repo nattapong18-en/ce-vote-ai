@@ -4,307 +4,745 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CE AI Tools Voting</title>
-    
-    <!-- นำเข้า Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- นำเข้า AOS CSS สำหรับแอนิเมชันตอนเลื่อนหน้าจอ -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
+    
     <style>
-        body {
-            background-color: #0f172a; /* Slate 900 */
-            color: #e2e8f0; /* Slate 200 */
-            overflow-x: hidden;
+        :root {
+            --bg: #f2eddd;
+            --card: #faf8f3;
+            --text: #2d2520;
+            --text-secondary: #6b625a;
+            --border: #dbcfb1;
+            --accent: #9AA090;
+            --accent-dark: #7d8574;
+            --gold: #D3AD79;
+            --gold-light: #f5ede0;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
         .hidden { display: none !important; }
 
+        /* Glass Card */
         .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(250, 248, 243, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
         }
 
+        /* Loading Screen */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #f2eddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease;
+        }
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Table */
+        .table-wrapper {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--card);
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+        }
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .compare-table thead th {
+            background: #f5f0e5;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #5a5248;
+            padding: 18px 20px;
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-align: left;
+        }
+        .compare-table tbody td {
+            padding: 16px 20px;
+            font-size: 0.88rem;
+            color: #3d3530;
+            border-bottom: 1px solid #ede4d5;
+            vertical-align: top;
+            line-height: 1.7;
+            text-align: left;
+        }
+        .compare-table tbody tr {
+            transition: background 0.25s ease;
+        }
+        .compare-table tbody tr:hover {
+            background: #fdfbf7;
+        }
+        .compare-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .feature-label {
+            font-weight: 700;
+            color: #2d2520;
+            font-size: 0.88rem;
+        }
+        .feature-sublabel {
+            font-size: 0.72rem;
+            color: #9a9080;
+            font-weight: 400;
+        }
+        .token-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+        .token-badge-claude { background: #f5ede0; color: #b8863a; }
+        .token-badge-gpt { background: #e8f0ea; color: #4a7c5f; }
+        .token-badge-gemini { background: #e8edf5; color: #4a6d9e; }
+        .price-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .price-claude { background: #f5ede0; color: #b8863a; }
+        .price-gpt { background: #e8f0ea; color: #4a7c5f; }
+        .price-gemini { background: #e8edf5; color: #4a6d9e; }
+
+        /* Buttons */
+        .btn-primary {
+            background: #5a5248;
+            color: #faf8f3;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        .btn-primary:hover {
+            background: #3d3530;
+            box-shadow: 0 6px 20px rgba(90, 82, 72, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #5a5248;
+            padding: 11px 22px;
+            border-radius: 14px;
+            font-weight: 500;
+            font-size: 0.88rem;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-outline:hover {
+            background: #f5f0e5;
+            border-color: #c4b99a;
+            color: #2d2520;
+        }
+
+        /* Vote Cards */
+        .vote-card {
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .vote-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+        }
+        .vote-card:active {
+            transform: scale(0.97);
+        }
+
+        /* Progress Bar */
+        .progress-track {
+            background: #e8e0d2;
+            border-radius: 100px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 1.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 0;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #5a5248;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 12px;
+            border: 1.5px solid #dbcfb1;
+            background: #fdfbf7;
+            font-size: 0.9rem;
+            color: #2d2520;
+            transition: all 0.2s ease;
+            outline: none;
+            font-family: inherit;
+        }
+        .form-input:focus {
+            border-color: #9AA090;
+            box-shadow: 0 0 0 4px rgba(154, 160, 144, 0.12);
+            background: #fff;
+        }
+        .form-input::placeholder {
+            color: #c4b9a7;
+        }
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5248' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+
+        /* Loader */
         .loader {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #3b82f6;
+            width: 20px; height: 20px;
+            border: 2.5px solid #dbcfb1;
+            border-top: 2.5px solid #9AA090;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
+            animation: spin 0.6s linear infinite;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .fade-in-section {
-            animation: fadeIn 0.6s ease-out forwards;
+        /* Fade In */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* ปรับแต่ง Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c4b99a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8987a; }
+
+        /* Checkmark */
+        .checkmark-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #e8f0ea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
         }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.5); 
+
+        /* Notice Box */
+        .notice-box {
+            background: #fdfbf7;
+            border: 1px solid #dbcfb1;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.78rem;
+            color: #7a7060;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.5;
         }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(71, 85, 105, 0.8); 
-            border-radius: 4px;
+        .notice-box svg {
+            flex-shrink: 0;
+            margin-top: 1px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(100, 116, 139, 1); 
+
+        .icon-svg {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 3px;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #dbcfb1, transparent);
         }
     </style>
 </head>
-<body class="font-sans min-h-screen flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
+<body class="min-h-screen">
 
-    <div class="max-w-7xl w-full">
-        <!-- Header -->
-        <div class="text-center mb-10" data-aos="fade-down" data-aos-duration="800">
-            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 mb-3 tracking-tight">
-                Computer Engineering AI Voting
-            </h1>
-            <p class="text-slate-400 text-lg">เปรียบเทียบ AI แบบเจาะลึก ศึกษาสเปคก่อนตัดสินใจโหวตเครื่องมือของสาขาประจำปี</p>
-        </div>
-
-        <!-- ตารางเปรียบเทียบเชิงลึก (ซ่อนเมื่อเข้าสู่หน้าโหวต) -->
-        <div id="compare-section" class="glass-card rounded-2xl shadow-2xl overflow-hidden mb-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-sm sm:text-base min-w-[1000px]">
-                    <thead>
-                        <tr class="bg-slate-800/80">
-                            <th class="p-5 border-b border-slate-600 font-semibold w-[20%] text-slate-300">ความสามารถทางวิศวกรรม</th>
-                            <th class="p-5 border-b border-slate-600 font-semibold w-[26%] text-purple-400 text-lg">Claude Pro (Anthropic)</th>
-                            <th class="p-5 border-b border-slate-600 font-semibold w-[26%] text-emerald-400 text-lg">GPT Pro (OpenAI)</th>
-                            <th class="p-5 border-b border-slate-600 font-semibold w-[26%] text-blue-400 text-lg">Gemini Advanced (Google)</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-700/50">
-                        <tr class="hover:bg-slate-800/40 transition-colors">
-                            <td class="p-5 font-semibold text-slate-200">สถาปัตยกรรม & การคิดวิเคราะห์<br><span class="text-xs text-slate-500 font-normal">(Core Logic & Backend)</span></td>
-                            <td class="p-5 text-slate-300">
-                                <strong>Claude 3.5 Sonnet:</strong> โดดเด่นสุดเรื่องการเขียนโค้ดคลีน มีโครงสร้างชัดเจน เก่งมากในการวิเคราะห์เรื่อง Memory Management และ Concurrency จัดการระบบ Transaction ของ Database ที่ซับซ้อนได้รัดกุม
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                <strong>GPT-4o & o1-preview:</strong> แข็งแกร่งด้าน Algorithmic Thinking รุ่น o1 สามารถ "คิดก่อนตอบ" (Chain of Thought) เหมาะกับการแก้โจทย์คณิตศาสตร์ขั้นสูง หรือไล่บั๊กเชิงตรรกะที่ซ้อนกันหลายชั้น
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                <strong>Gemini 1.5 Pro:</strong> สถาปัตยกรรม MoE (Mixture of Experts) ทำงานแบบคู่ขนานได้เร็ว ออกแบบมาเพื่อทำงานประสานกับ Cloud Infrastructure และสถาปัตยกรรม Microservices ขนาดใหญ่ได้ดี
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-800/40 transition-colors">
-                            <td class="p-5 font-semibold text-slate-200">หน่วยความจำบริบท<br><span class="text-xs text-slate-500 font-normal">(Context Window & RAG)</span></td>
-                            <td class="p-5 text-slate-300">
-                                <span class="font-semibold text-purple-300">200,000 Tokens (~500 หน้า)</span><br>
-                                Recall Rate แม่นยำเกือบ 100% สามารถโยนคู่มือ Framework API ยาวๆ หรือไฟล์ JSON Database เข้าไปให้ประมวลผล แล้วบอทจะจำบริบทได้ตลอดการสนทนาโดยไม่หลุด
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                <span class="font-semibold text-emerald-300">128,000 Tokens (~300 หน้า)</span><br>
-                                ใช้งานระดับโปรเจกต์กลางๆ ได้ดีเยี่ยม แต่อาจเกิดปรากฏการณ์ "Lost in the middle" (ลืมข้อมูลช่วงกลาง) หากอัปโหลด Log Files ของเซิร์ฟเวอร์ที่ยาวเกินไป
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                <span class="font-semibold text-blue-300">1,000,000 - 2,000,000 Tokens (สูงสุด)</span><br>
-                                พลังดึงข้อมูลโหดที่สุด โยน Source Code ทั้งโฟลเดอร์ หรือข้อมูล Log เครือข่าย (Network Traffic) เข้าไปให้มันกวาดหาสิ่งผิดปกติพร้อมกันทีเดียวได้สบายๆ
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-800/40 transition-colors">
-                            <td class="p-5 font-semibold text-slate-200">สาย OS, System & CLI<br><span class="text-xs text-slate-500 font-normal">(Linux / Terminal / Network)</span></td>
-                            <td class="p-5 text-slate-300">
-                                มี <strong>Claude Code</strong> ที่เป็น Agent รันบน Terminal โดยตรง เหมาะกับสาย Linux Power User ช่วยไล่อ่านไฟล์, ค้นหา, และแก้โค้ดข้ามไฟล์ใน Directory ได้แบบอัตโนมัติ
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                สามารถเขียนและรันสคริปต์ Python หรือ Bash หลังบ้านได้ทันที (Advanced Data Analysis) เหมาะกับการให้มันจำลองการเขียน Automation Script หรือจัดการ Package ต่างๆ
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                บูรณาการกับ <strong>Gemini Cloud Assist</strong> เก่งในการช่วยตั้งค่า Server, คอนฟิก Container, จัดการ Kubernetes และการเขียน Shell Script ที่อิงกับ Cloud
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-800/40 transition-colors">
-                            <td class="p-5 font-semibold text-slate-200">สาย Cybersecurity<br><span class="text-xs text-slate-500 font-normal">(Vulnerability & SecOps)</span></td>
-                            <td class="p-5 text-slate-300">
-                                ปฏิเสธการเขียนโค้ดมุ่งร้ายอย่างเคร่งครัด แต่เก่งมากในการทำ Code Review เพื่อหาช่องโหว่ (Vulnerability) และตรวจสอบโค้ดตามมาตรฐานความปลอดภัย
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                มีฐานข้อมูลอัปเดตใหม่ล่าสุดเรื่อง Zero-day Exploit หรือ CVE ใหม่ๆ และสามารถช่วยจำลองสถานการณ์หรืออธิบาย Framework ความปลอดภัย (เช่น NIST) ได้ชัดเจน
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                ดึงข้อมูล Threat Intelligence จาก Google แบบ Real-time เก่งในการตรวจสอบรูปแบบของมัลแวร์ และเชื่อมข้อมูลกับเครื่องมือของ Google SecOps
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-slate-800/40 transition-colors">
-                            <td class="p-5 font-semibold text-slate-200">สายออกแบบ & Frontend<br><span class="text-xs text-slate-500 font-normal">(UI/UX & Graphics)</span></td>
-                            <td class="p-5 text-slate-300">
-                                มี <strong>Artifacts</strong> สุดล้ำ สั่งให้ออกแบบ UI/UX, Component หรือทำ Wireframe (เทียบเท่าการสเก็ตช์ภาพ) แล้วเรนเดอร์เป็นหน้าเว็บ Interactive ให้กดเล่นได้ทันที
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                สามารถเจนภาพระบบด้วย DALL-E 3 หรืออัปโหลดภาพ Layout/แผนภาพ แล้วสั่งให้มันเขียนโค้ด HTML/CSS ออกมาให้เหมือนภาพเป๊ะๆ ได้ (Vision Capability)
-                            </td>
-                            <td class="p-5 text-slate-300">
-                                ทำงานได้ดีกับการเขียน Component ของ Mobile App หรือ Web App ที่ต้องการต่อกับ API หรือบริการฐานข้อมูลของ Firebase/Google Cloud
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ส่วนของฟอร์มล็อกอิน (ซ่อนเมื่อเข้าสู่หน้าโหวต) -->
-        <div id="login-section" class="max-w-md mx-auto glass-card p-8 rounded-2xl" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="200">
-            <h2 class="text-2xl font-bold mb-6 text-center text-slate-100">ยืนยันตัวตนก่อนโหวต</h2>
-            <form id="login-form" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-1">ชื่อ - นามสกุล</label>
-                    <input type="text" id="name-input" required placeholder="เช่น นายวิศวะ คอมพิวเตอร์" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-1">รหัสนักศึกษา (จำกัด 1 สิทธิ์ / 1 รหัส)</label>
-                    <!-- เปลี่ยน Type เป็น text แต่ใส่ pattern ให้รับเฉพาะตัวเลข -->
-                    <input type="text" id="student-id-input" required pattern="[0-9]+" placeholder="เช่น 66xxxxxxxx" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-400 mb-1">ชื่อเล่น</label>
-                        <input type="text" id="nick-input" required placeholder="เช่น คอม" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-400 mb-1">ชั้นปี</label>
-                        <select id="year-input" required class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none">
-                            <option value="" disabled selected>เลือกชั้นปี...</option>
-                            <option value="1">ปี 1</option>
-                            <option value="2">ปี 2</option>
-                            <option value="3">ปี 3</option>
-                            <option value="4">ปี 4</option>
-                            <option value="อื่นๆ">อื่นๆ</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <button type="submit" id="login-btn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-blue-500 hover:to-indigo-500 transform hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2 mt-4 shadow-lg shadow-blue-500/30">
-                    <span>ตรวจสอบสิทธิ์และเข้าสู่หน้าโหวต</span>
-                    <div id="login-loader" class="loader hidden"></div>
-                </button>
-            </form>
-            <p id="error-msg" class="text-red-400 text-sm mt-4 text-center hidden bg-red-900/20 p-2 rounded"></p>
-        </div>
-
-        <!-- ส่วนของการโหวต (เสมือนเป็นหน้าใหม่) -->
-        <div id="vote-section" class="hidden text-center fade-in-section max-w-4xl mx-auto mt-10">
-            <h2 class="text-3xl font-bold mb-2 text-slate-100">สวัสดี <span id="display-name" class="text-blue-400"></span> (ปี <span id="display-year"></span>)</h2>
-            <p class="text-slate-400 mb-12 text-lg">เครื่องมือใดตอบโจทย์สายงานและความถนัดของคุณมากที่สุด? <br><span class="text-sm text-red-400">(กรุณาตัดสินใจให้ดี โหวตได้เพียง 1 ครั้งเท่านั้น)</span></p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Claude -->
-                <button id="btn-claude" class="group glass-card border border-slate-700 hover:border-purple-500 rounded-3xl p-10 transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_15px_40px_-10px_rgba(168,85,247,0.5)] flex flex-col items-center">
-                    <div class="w-20 h-20 rounded-full bg-purple-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="text-4xl">🧠</span>
-                    </div>
-                    <span class="text-2xl font-bold text-slate-200 group-hover:text-purple-400 transition-colors">Claude Pro</span>
-                </button>
-                
-                <!-- GPT -->
-                <button id="btn-gpt" class="group glass-card border border-slate-700 hover:border-emerald-500 rounded-3xl p-10 transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_15px_40px_-10px_rgba(16,185,129,0.5)] flex flex-col items-center">
-                    <div class="w-20 h-20 rounded-full bg-emerald-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="text-4xl">⚡</span>
-                    </div>
-                    <span class="text-2xl font-bold text-slate-200 group-hover:text-emerald-400 transition-colors">GPT Pro</span>
-                </button>
-
-                <!-- Gemini -->
-                <button id="btn-gemini" class="group glass-card border border-slate-700 hover:border-blue-500 rounded-3xl p-10 transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_15px_40px_-10px_rgba(59,130,246,0.5)] flex flex-col items-center">
-                    <div class="w-20 h-20 rounded-full bg-blue-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <span class="text-4xl">✨</span>
-                    </div>
-                    <span class="text-2xl font-bold text-slate-200 group-hover:text-blue-400 transition-colors">Gemini Adv.</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- ส่วนแสดงผลหลังโหวต (รวมระบบโชว์กราฟแท่ง) -->
-        <div id="success-section" class="hidden py-12 fade-in-section max-w-3xl mx-auto w-full">
-            <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <h2 class="text-3xl font-bold text-slate-100 mb-3">บันทึกข้อมูลสำเร็จ!</h2>
-                <p class="text-slate-400 text-lg">ขอบคุณที่ร่วมออกเสียง คุณได้โหวตให้ <span id="voted-for" class="font-bold text-white px-3 py-1 bg-slate-800 rounded-lg border border-slate-700"></span></p>
-            </div>
-
-            <!-- กล่องแสดงผลคะแนนโหวตแบบกราฟแท่ง -->
-            <div id="results-container" class="glass-card p-8 rounded-2xl hidden">
-                <h3 class="text-xl font-bold text-slate-200 mb-6 text-center">📊 ผลโหวตของสาขาขณะนี้ (Real-time)</h3>
-                
-                <div class="space-y-6">
-                    <!-- แท่ง Claude -->
-                    <div>
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-purple-400 font-semibold text-base">Claude Pro</span>
-                            <span id="score-claude" class="text-slate-300 font-medium">กำลังโหลด...</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-4 border border-slate-700">
-                            <div id="bar-claude" class="bg-gradient-to-r from-purple-600 to-purple-400 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- แท่ง GPT -->
-                    <div>
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-emerald-400 font-semibold text-base">GPT Pro</span>
-                            <span id="score-gpt" class="text-slate-300 font-medium">กำลังโหลด...</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-4 border border-slate-700">
-                            <div id="bar-gpt" class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- แท่ง Gemini -->
-                    <div>
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-blue-400 font-semibold text-base">Gemini Advanced</span>
-                            <span id="score-gemini" class="text-slate-300 font-medium">กำลังโหลด...</span>
-                        </div>
-                        <div class="w-full bg-slate-800 rounded-full h-4 border border-slate-700">
-                            <div id="bar-gemini" class="bg-gradient-to-r from-blue-600 to-blue-400 h-full rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-center text-xs text-slate-500 mt-6 mt-4">จำนวนวิศวกรที่ร่วมโหวตทั้งหมด: <span id="total-voters" class="font-bold text-slate-300">0</span> คน</p>
-            </div>
-        </div>
-
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="loader" style="width: 40px; height: 40px; border-width: 3px;"></div>
+        <p class="text-gray-600 mt-4 text-sm">กำลังเชื่อมต่อระบบ...</p>
     </div>
 
-    <!-- นำเข้า AOS JS สำหรับประมวลผลแอนิเมชัน -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({ once: true, offset: 50 });
-    </script>
+    <!-- Header -->
+    <header class="text-center pt-14 pb-8 px-4">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3 tracking-tight">
+            AI Tools for Computer Engineering
+        </h1>
+        <p class="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
+            เปรียบเทียบความสามารถของ AI แต่ละค่าย เพื่อเลือกเครื่องมือที่ใช่สำหรับคุณ
+        </p>
+    </header>
 
-    <!-- โค้ดเชื่อมต่อ Firebase -->
+    <main id="app-content" class="max-w-5xl mx-auto px-4 sm:px-6 pb-24 hidden">
+
+        <!-- ============ SECTION 1: Comparison Table ============ -->
+        <section id="compare-section" class="mb-12" data-aos="fade-up" data-aos-duration="700">
+            
+            <!-- AI Disclaimer Notice -->
+            <div class="notice-box mb-5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA090" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                <span><strong>หมายเหตุ:</strong> ข้อมูลในตารางนี้สร้างโดย AI (ณ เดือนกรกฎาคม 2026) อาจมีความคลาดเคลื่อนหรือไม่เป็นปัจจุบัน ควรตรวจสอบข้อมูลเพิ่มเติมก่อนตัดสินใจ</span>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="overflow-x-auto">
+                    <table class="compare-table min-w-[900px]">
+                        <thead>
+                            <tr>
+                                <th class="w-[16%]">ความสามารถ</th>
+                                <th class="w-[28%]">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="icon-svg" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#f5ede0" stroke="#D3AD79" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="#D3AD79"/></svg>
+                                        <span style="color: #b8863a;">Claude</span>
+                                    </div>
+                                    <span class="block text-xs font-normal text-gray-500 mt-0.5 normal-case tracking-normal">Anthropic</span>
+                                </th>
+                                <th class="w-[28%]">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="icon-svg" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" fill="#e8f0ea" stroke="#4a7c5f" stroke-width="1.5"/><path d="M7 16h10" stroke="#4a7c5f" stroke-width="2" stroke-linecap="round"/></svg>
+                                        <span style="color: #4a7c5f;">ChatGPT</span>
+                                    </div>
+                                    <span class="block text-xs font-normal text-gray-500 mt-0.5 normal-case tracking-normal">OpenAI</span>
+                                </th>
+                                <th class="w-[28%]">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="icon-svg" viewBox="0 0 24 24" fill="none"><polygon points="12,2 22,20 2,20" fill="#e8edf5" stroke="#4a6d9e" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="15" r="2" fill="#4a6d9e"/></svg>
+                                        <span style="color: #4a6d9e;">Gemini</span>
+                                    </div>
+                                    <span class="block text-xs font-normal text-gray-500 mt-0.5 normal-case tracking-normal">Google</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="feature-label">💻 การเขียนโค้ด</div>
+                                    <div class="feature-sublabel">Code Generation & Debugging</div>
+                                </td>
+                                <td>เขียนโค้ดมีโครงสร้างชัดเจน อ่านง่าย มีคอมเมนต์อธิบาย จัดการโปรเจกต์ใหญ่หลายไฟล์ได้ดีผ่าน CLI Agent เหมาะกับงานที่ต้องการความละเอียดรอบคอบ</td>
+                                <td>แข็งแกร่งด้านการแก้โจทย์ซับซ้อน อัลกอริทึมขั้นสูง มี Code Interpreter รัน Python ได้ทันที เหมาะกับงานวิจัยและโจทย์ยาก</td>
+                                <td>สร้างโค้ดไฟล์ยาวในครั้งเดียวได้ดี เชื่อมต่อกับ Google Cloud, Firebase, Android ได้แนบแน่น มี free tier ใจกว้าง</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="feature-label">📚 หน่วยความจำ</div>
+                                    <div class="feature-sublabel">Context Window</div>
+                                </td>
+                                <td><span class="token-badge token-badge-claude">200K tokens</span><br><span class="text-sm text-gray-500 mt-1 block">จดจำเนื้อหาได้แม่นยำตลอดการสนทนา</span></td>
+                                <td><span class="token-badge token-badge-gpt">128K tokens</span><br><span class="text-sm text-gray-500 mt-1 block">วิเคราะห์เอกสารขนาดกลางได้ดี</span></td>
+                                <td><span class="token-badge token-badge-gemini">1M tokens</span><br><span class="text-sm text-gray-500 mt-1 block">ส่งโค้ดทั้งโปรเจกต์เข้าไปวิเคราะห์พร้อมกัน</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="feature-label">🖼️ ไฟล์ & มีเดีย</div>
+                                    <div class="feature-sublabel">Multimodal & Vision</div>
+                                </td>
+                                <td>อ่านภาพ แผนภูมิ PDF ได้ดี แสดง UI แบบ interactive ในแชทได้ทันทีผ่าน Artifacts เหมาะกับงาน frontend</td>
+                                <td>วิเคราะห์ภาพ screenshot, เอกสารสแกนได้แม่นยำ สร้างภาพและวิดีโอในตัว</td>
+                                <td>รับ input ได้ทุกประเภท (ข้อความ รูป เสียง วิดีโอ) พร้อมกัน เชื่อม Google Search และ YouTube ได้</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="feature-label">🔒 ความปลอดภัย</div>
+                                    <div class="feature-sublabel">Safety & Privacy</div>
+                                </td>
+                                <td>เน้นความปลอดภัยสูง ปฏิเสธเนื้อหาอันตรายอย่างเคร่งครัด มีนโยบาย privacy ที่เข้มงวด ไม่นำข้อมูลไปเทรนต่อ</td>
+                                <td>มีระบบกรองเนื้อหาที่ไม่เหมาะสม สามารถตั้งค่า privacy ได้ ไม่นำข้อมูลจาก API มาเทรน</td>
+                                <td>ใช้โครงสร้างความปลอดภัยของ Google Cloud มีการเข้ารหัสข้อมูล ควบคุมสิทธิ์การเข้าถึงได้ละเอียด</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="feature-label">🛠️ เครื่องมือ Dev</div>
+                                    <div class="feature-sublabel">IDE Integration & APIs</div>
+                                </td>
+                                <td>CLI Agent บน Terminal ทำงานข้ามไฟล์ รัน Git, Tests และมี MCP Protocol สำหรับเชื่อมต่อ tools</td>
+                                <td>Desktop App, API ครบวงจร, GPT Store สำหรับเครื่องมือเฉพาะทาง, Plugins มากมาย</td>
+                                <td>CLI ฟรี, บูรณาการกับ VS Code และ JetBrains, มี Gemini Code Assist</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="feature-label">🌐 ภาษา & รองรับ</div>
+                                    <div class="feature-sublabel">Language Support</div>
+                                </td>
+                                <td>รองรับภาษาไทยได้ดี เข้าใจบริบทและวัฒนธรรมไทยในระดับที่น่าพอใจ</td>
+                                <td>รองรับหลายภาษา รวมถึงภาษาไทย มีความเข้าใจที่ดีในระดับสากล</td>
+                                <td>รองรับมากกว่า 40 ภาษา ภาษาไทยอยู่ในระดับดี มีการปรับแต่งสำหรับตลาดเอเชีย</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="feature-label">💰 ราคาเริ่มต้น</div>
+                                    <div class="feature-sublabel">Pricing</div>
+                                </td>
+                                <td><span class="price-badge price-claude">$20/เดือน</span><br><span class="text-xs text-gray-400 mt-1 block">Claude Pro</span></td>
+                                <td><span class="price-badge price-gpt">$20/เดือน</span><br><span class="text-xs text-gray-400 mt-1 block">ChatGPT Plus</span></td>
+                                <td><span class="price-badge price-gemini">$19.99/เดือน</span><br><span class="text-xs text-gray-400 mt-1 block">Google One AI Premium (รวม 2TB)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ SECTION 2: Login Form ============ -->
+        <section id="login-section" class="max-w-md mx-auto" data-aos="fade-up" data-aos-duration="700" data-aos-delay="100">
+            <div class="glass-card p-8 md:p-10">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#f5ede0] mb-3">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D3AD79" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">ยืนยันตัวตน</h2>
+                    <p class="text-sm text-gray-500 mt-1">กรอกข้อมูลเพื่อเข้าสู่หน้าโหวต</p>
+                </div>
+                
+                <form id="login-form" class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">ชื่อ - นามสกุล</label>
+                        <input type="text" id="name-input" required placeholder="นายวิศวะ คอมพิวเตอร์" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">รหัสนักศึกษา</label>
+                        <input type="text" id="student-id-input" required pattern="[0-9]+" placeholder="66xxxxxxxx" class="form-input">
+                        <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                            1 สิทธิ์ต่อ 1 รหัสเท่านั้น
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">ชื่อเล่น</label>
+                            <input type="text" id="nick-input" required placeholder="คอม" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ชั้นปี</label>
+                            <select id="year-input" required class="form-input">
+                                <option value="" disabled selected>เลือก...</option>
+                                <option value="1">ปี 1</option>
+                                <option value="2">ปี 2</option>
+                                <option value="3">ปี 3</option>
+                                <option value="4">ปี 4</option>
+                                <option value="อื่นๆ">อื่นๆ</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="login-btn" class="btn-primary w-full mt-2">
+                        <span>เข้าสู่หน้าโหวต</span>
+                        <div id="login-loader" class="loader hidden"></div>
+                    </button>
+                </form>
+                
+                <p id="error-msg" class="text-red-600 text-sm mt-3 text-center hidden bg-red-50 p-3 rounded-xl border border-red-200"></p>
+                
+                <!-- View Results Button -->
+                <div class="divider my-5"></div>
+                <button id="btn-view-results" class="btn-outline w-full justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    ดูผลโหวตปัจจุบัน
+                </button>
+            </div>
+        </section>
+
+        <!-- ============ SECTION 3: Vote Page ============ -->
+        <section id="vote-section" class="hidden text-center fade-in max-w-2xl mx-auto">
+            <div class="glass-card p-8 md:p-10 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-1">
+                    สวัสดี <span id="display-name" class="text-[#b8863a]"></span> 👋
+                </h2>
+                <p class="text-gray-500 mb-2">ชั้นปี <span id="display-year"></span></p>
+                <p class="text-gray-600 text-sm">
+                    เลือกเครื่องมือที่ตอบโจทย์คุณที่สุด<br>
+                    <span class="text-red-500 text-xs flex items-center justify-center gap-1 mt-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                        โหวตได้เพียง 1 ครั้ง ไม่สามารถเปลี่ยนแปลงได้
+                    </span>
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Claude Vote Button -->
+                <button id="btn-claude" class="vote-card glass-card p-8 flex flex-col items-center border-2 border-transparent hover:border-[#D3AD79]/40">
+                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" class="mb-4">
+                        <circle cx="12" cy="12" r="10" fill="#f5ede0" stroke="#D3AD79" stroke-width="1.5"/>
+                        <circle cx="12" cy="12" r="3" fill="#D3AD79"/>
+                    </svg>
+                    <span class="text-lg font-bold text-gray-800">Claude</span>
+                    <span class="text-sm text-gray-500">Anthropic</span>
+                    <span class="text-xs text-[#b8863a] mt-3 bg-[#f5ede0] px-3 py-1.5 rounded-full font-medium">โค้ดละเอียด อ่านง่าย</span>
+                </button>
+                
+                <!-- ChatGPT Vote Button -->
+                <button id="btn-gpt" class="vote-card glass-card p-8 flex flex-col items-center border-2 border-transparent hover:border-[#4a7c5f]/40">
+                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" class="mb-4">
+                        <rect x="3" y="3" width="18" height="18" rx="5" fill="#e8f0ea" stroke="#4a7c5f" stroke-width="1.5"/>
+                        <path d="M7 16h10" stroke="#4a7c5f" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-lg font-bold text-gray-800">ChatGPT</span>
+                    <span class="text-sm text-gray-500">OpenAI</span>
+                    <span class="text-xs text-[#4a7c5f] mt-3 bg-[#e8f0ea] px-3 py-1.5 rounded-full font-medium">ตรรกะขั้นสูง วิจัย</span>
+                </button>
+
+                <!-- Gemini Vote Button -->
+                <button id="btn-gemini" class="vote-card glass-card p-8 flex flex-col items-center border-2 border-transparent hover:border-[#4a6d9e]/40">
+                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" class="mb-4">
+                        <polygon points="12,2 22,20 2,20" fill="#e8edf5" stroke="#4a6d9e" stroke-width="1.5" stroke-linejoin="round"/>
+                        <circle cx="12" cy="15" r="2" fill="#4a6d9e"/>
+                    </svg>
+                    <span class="text-lg font-bold text-gray-800">Gemini</span>
+                    <span class="text-sm text-gray-500">Google</span>
+                    <span class="text-xs text-[#4a6d9e] mt-3 bg-[#e8edf5] px-3 py-1.5 rounded-full font-medium">โปรเจกต์ใหญ่ บริบทเยอะ</span>
+                </button>
+            </div>
+
+            <!-- View Results Button (on vote page) -->
+            <button id="btn-view-results-2" class="btn-outline mt-8 mx-auto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                ดูผลโหวตปัจจุบัน
+            </button>
+        </section>
+
+        <!-- ============ SECTION 4: Results Page ============ -->
+        <section id="success-section" class="hidden text-center fade-in max-w-lg mx-auto">
+            <div class="glass-card p-8 mb-6">
+                <div class="checkmark-circle mb-4">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4a7c5f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">โหวตสำเร็จ!</h2>
+                <p class="text-gray-600">
+                    คุณโหวตให้ <span id="voted-for" class="font-bold text-[#b8863a] bg-[#f5ede0] px-3 py-1 rounded-full text-sm"></span>
+                </p>
+            </div>
+
+            <!-- Results Chart -->
+            <div id="results-container" class="glass-card p-8 text-left">
+                <h3 class="text-lg font-bold text-gray-800 mb-6 text-center">📊 ผลโหวตล่าสุด</h3>
+                
+                <div class="space-y-5">
+                    <!-- Claude Bar -->
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-semibold text-gray-700 flex items-center gap-1.5">
+                                <svg class="icon-svg" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#f5ede0" stroke="#D3AD79" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="#D3AD79"/></svg>
+                                Claude
+                            </span>
+                            <span id="score-claude" class="text-gray-500 text-sm font-medium">0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div id="bar-claude" class="progress-fill" style="width: 0%; background: #D3AD79;"></div>
+                        </div>
+                    </div>
+
+                    <!-- GPT Bar -->
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-semibold text-gray-700 flex items-center gap-1.5">
+                                <svg class="icon-svg" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" fill="#e8f0ea" stroke="#4a7c5f" stroke-width="1.5"/><path d="M7 16h10" stroke="#4a7c5f" stroke-width="2" stroke-linecap="round"/></svg>
+                                ChatGPT
+                            </span>
+                            <span id="score-gpt" class="text-gray-500 text-sm font-medium">0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div id="bar-gpt" class="progress-fill" style="width: 0%; background: #4a7c5f;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Gemini Bar -->
+                    <div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="font-semibold text-gray-700 flex items-center gap-1.5">
+                                <svg class="icon-svg" viewBox="0 0 24 24" fill="none"><polygon points="12,2 22,20 2,20" fill="#e8edf5" stroke="#4a6d9e" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="15" r="2" fill="#4a6d9e"/></svg>
+                                Gemini
+                            </span>
+                            <span id="score-gemini" class="text-gray-500 text-sm font-medium">0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div id="bar-gemini" class="progress-fill" style="width: 0%; background: #4a6d9e;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center text-xs text-gray-500 mt-6">
+                    ผู้โหวตทั้งหมด <span id="total-voters" class="font-bold text-gray-700">0</span> คน
+                </p>
+            </div>
+
+            <!-- Back Button -->
+            <button id="btn-back-to-compare" class="btn-outline mt-6 mx-auto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                กลับไปหน้าข้อมูลเปรียบเทียบ
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>AOS.init({ once: true, offset: 30, duration: 600 });</script>
+
+    <!-- ============================================ -->
+    <!-- FIREBASE: All Firebase-related code below    -->
+    <!-- ============================================ -->
     <script type="module">
+        // ============================================
+        // IMPORTS: Firebase SDKs
+        // ============================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        // IMPORTANT: Remote Config SDK - used to fetch real API key at runtime
+        import { getRemoteConfig, getValue, fetchAndActivate } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-remote-config.js";
 
-        // !!!!!!!!!!!! เอา Config ของคุณมาวางทับในบล็อกนี้ทั้งหมด !!!!!!!!!!!!
-        const firebaseConfig = {
-          apiKey: "AIzaSyBml9XytbHTs-kGcLoxYjuDXiD-hf_qhvI",
-          authDomain: "ce-vote-app.firebaseapp.com",
-          projectId: "ce-vote-app",
-          storageBucket: "ce-vote-app.firebasestorage.app",
-          messagingSenderId: "841008708486",
-          appId: "1:841008708486:web:e92540367f92c8730eca07",
-          measurementId: "G-THZFJY9RV8" 
+        // ============================================
+        // PLACEHOLDER CONFIG: Safe to expose on GitHub
+        // Real values are stored in Firebase Remote Config
+        // ============================================
+        const PLACEHOLDER = {
+            apiKey: "PLACEHOLDER",
+            authDomain: "PLACEHOLDER",
+            projectId: "PLACEHOLDER",
+            storageBucket: "PLACEHOLDER",
+            messagingSenderId: "PLACEHOLDER",
+            appId: "PLACEHOLDER",
+            measurementId: "PLACEHOLDER"
         };
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // ============================================
+        // FUNCTION: Fetch real Firebase config from Remote Config
+        // This keeps the API key hidden from source code
+        // ============================================
+        async function getRealConfig() {
+            // Create a temporary app with placeholder values
+            const tempApp = initializeApp(PLACEHOLDER, "temp");
+            const remoteConfig = getRemoteConfig(tempApp);
+            
+            // Cache config for 1 hour before re-fetching
+            remoteConfig.settings.minimumFetchIntervalMillis = 3600000;
+            
+            // Fetch and activate the remote config
+            await fetchAndActivate(remoteConfig);
+            
+            // Build the real config from Remote Config values
+            return {
+                apiKey: getValue(remoteConfig, "api_key").asString(),
+                authDomain: getValue(remoteConfig, "auth_domain").asString(),
+                projectId: getValue(remoteConfig, "project_id").asString(),
+                storageBucket: getValue(remoteConfig, "storage_bucket").asString(),
+                messagingSenderId: getValue(remoteConfig, "messaging_sender_id").asString(),
+                appId: getValue(remoteConfig, "app_id").asString(),
+                measurementId: getValue(remoteConfig, "measurement_id").asString()
+            };
+        }
 
-        let currentUser = { fullName: '', studentId: '', nickname: '', year: '' };
+        // ============================================
+        // GLOBAL VARIABLES
+        // ============================================
+        let db;           // Firestore database instance
+        let currentUser = {};  // Current user data
 
+        // ============================================
+        // FUNCTION: Initialize the app
+        // ============================================
+        async function startApp() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const appContent = document.getElementById('app-content');
+            
+            try {
+                // Fetch real config from Firebase Remote Config
+                const realConfig = await getRealConfig();
+                
+                // Initialize Firebase with real config
+                const app = initializeApp(realConfig, "main");
+                db = getFirestore(app);
+                
+                console.log("✅ Firebase initialized successfully!");
+                
+                // Hide loading, show app content
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                    appContent.classList.remove('hidden');
+                }, 400);
+                
+            } catch (error) {
+                console.error("❌ Failed to initialize Firebase:", error);
+                loadingOverlay.innerHTML = `
+                    <div style="text-align: center; color: #b91c1c;">
+                        <p>⚠️ ไม่สามารถเชื่อมต่อระบบได้</p>
+                        <p style="font-size: 0.85rem; margin-top: 8px;">กรุณาลองใหม่หรือติดต่อผู้ดูแล</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // LOGIN FORM HANDLER
+        // ============================================
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -322,32 +760,29 @@
             errorMsg.classList.add('hidden');
 
             try {
-                // เช็คว่า "รหัสนักศึกษา" นี้เคยโหวตหรือยัง
+                // Check if this student ID has already voted
                 const q = query(collection(db, "votes"), where("studentId", "==", studentId));
-                const querySnapshot = await getDocs(q);
+                const snap = await getDocs(q);
 
-                if (!querySnapshot.empty) {
-                    errorMsg.textContent = "รหัสนักศึกษานี้ได้ทำการโหวตไปแล้ว ไม่สามารถโหวตซ้ำได้ครับ!";
+                if (!snap.empty) {
+                    errorMsg.textContent = "รหัสนักศึกษานี้โหวตไปแล้ว";
                     errorMsg.classList.remove('hidden');
                 } else {
                     currentUser = { fullName, studentId, nickname, year };
-                    
                     document.getElementById('display-name').textContent = nickname;
                     document.getElementById('display-year').textContent = year;
                     
-                    // ทำการซ่อนตารางข้อมูลและฟอร์มล็อกอิน เพื่อให้รู้สึกเหมือนเข้าหน้าใหม่
+                    // Switch to vote page
                     document.getElementById('compare-section').classList.add('hidden');
                     document.getElementById('login-section').classList.add('hidden');
-                    
-                    // โชว์หน้าปุ่มโหวต
                     document.getElementById('vote-section').classList.remove('hidden');
+                    document.getElementById('success-section').classList.add('hidden');
                     
-                    // เลื่อนหน้าจอกลับไปบนสุดทันที
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-            } catch (error) {
-                console.error("Firebase Error: ", error);
-                errorMsg.textContent = "เชื่อมต่อฐานข้อมูลไม่สำเร็จ กรุณาตรวจสอบ Firebase Config";
+            } catch (err) {
+                console.error(err);
+                errorMsg.textContent = "เกิดข้อผิดพลาด กรุณาลองใหม่";
                 errorMsg.classList.remove('hidden');
             } finally {
                 loginBtn.disabled = false;
@@ -355,80 +790,117 @@
             }
         });
 
-        // ฟังก์ชันดึงและคำนวณผลโหวต
-        async function fetchAndDisplayResults() {
-            const resultsContainer = document.getElementById('results-container');
-            resultsContainer.classList.remove('hidden');
+        // ============================================
+        // FUNCTION: Fetch and display voting results
+        // ============================================
+        async function fetchResults() {
+            const container = document.getElementById('results-container');
+            container.classList.remove('hidden');
             
             try {
-                const querySnapshot = await getDocs(collection(db, "votes"));
-                let claudeVotes = 0, gptVotes = 0, geminiVotes = 0, totalVotes = 0;
+                const snap = await getDocs(collection(db, "votes"));
+                let claude = 0, gpt = 0, gemini = 0, total = 0;
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    if(data.choice === 'Claude Pro') claudeVotes++;
-                    else if(data.choice === 'GPT Pro') gptVotes++;
-                    else if(data.choice === 'Gemini Advanced') geminiVotes++;
-                    totalVotes++;
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    if (d.choice === 'Claude (Anthropic)') claude++;
+                    else if (d.choice === 'ChatGPT (OpenAI)') gpt++;
+                    else if (d.choice === 'Gemini (Google)') gemini++;
+                    total++;
                 });
 
-                document.getElementById('total-voters').textContent = totalVotes;
+                document.getElementById('total-voters').textContent = total;
+                if (total === 0) return;
 
-                if (totalVotes === 0) return;
+                const cP = Math.round((claude/total)*100);
+                const gP = Math.round((gpt/total)*100);
+                const gEP = Math.round((gemini/total)*100);
 
-                const claudePercent = Math.round((claudeVotes / totalVotes) * 100);
-                const gptPercent = Math.round((gptVotes / totalVotes) * 100);
-                const geminiPercent = Math.round((geminiVotes / totalVotes) * 100);
-
+                // Animate progress bars
                 setTimeout(() => {
-                    document.getElementById('bar-claude').style.width = `${claudePercent}%`;
-                    document.getElementById('score-claude').textContent = `${claudeVotes} โหวต (${claudePercent}%)`;
-
-                    document.getElementById('bar-gpt').style.width = `${gptPercent}%`;
-                    document.getElementById('score-gpt').textContent = `${gptVotes} โหวต (${gptPercent}%)`;
-
-                    document.getElementById('bar-gemini').style.width = `${geminiPercent}%`;
-                    document.getElementById('score-gemini').textContent = `${geminiVotes} โหวต (${geminiPercent}%)`;
+                    document.getElementById('bar-claude').style.width = `${cP}%`;
+                    document.getElementById('score-claude').textContent = `${claude} โหวต (${cP}%)`;
+                    document.getElementById('bar-gpt').style.width = `${gP}%`;
+                    document.getElementById('score-gpt').textContent = `${gpt} โหวต (${gP}%)`;
+                    document.getElementById('bar-gemini').style.width = `${gEP}%`;
+                    document.getElementById('score-gemini').textContent = `${gemini} โหวต (${gEP}%)`;
                 }, 150);
-
-            } catch (error) {
-                console.error("Error fetching results: ", error);
+            } catch (err) {
+                console.error(err);
             }
         }
 
-        async function submitVote(aiChoice) {
-            if(!confirm(`ยืนยันโหวตให้ ${aiChoice} หรือไม่? (ระบบจะบันทึกผลทันที)`)) return;
+        // ============================================
+        // FUNCTION: Submit a vote
+        // ============================================
+        async function submitVote(choice) {
+            if (!confirm(`ยืนยันโหวตให้ ${choice}?`)) return;
 
             try {
-                // บันทึกรหัสนักศึกษาลงฐานข้อมูลแทนอีเมล
+                // Save vote to Firestore
                 await addDoc(collection(db, "votes"), {
                     fullName: currentUser.fullName,
                     studentId: currentUser.studentId,
                     nickname: currentUser.nickname,
                     year: currentUser.year,
-                    choice: aiChoice,
+                    choice: choice,
                     timestamp: serverTimestamp()
                 });
 
-                document.getElementById('voted-for').textContent = aiChoice;
+                document.getElementById('voted-for').textContent = choice;
                 
-                // ซ่อนหน้าโหวต แล้วโชว์หน้าแสดงความสำเร็จ + กราฟผลโหวต
+                // Switch to success/results page
                 document.getElementById('vote-section').classList.add('hidden');
                 document.getElementById('success-section').classList.remove('hidden');
-                
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                await fetchAndDisplayResults();
-
-            } catch (error) {
-                console.error("Submit Error: ", error);
-                alert("เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่");
+                await fetchResults();
+            } catch (err) {
+                console.error(err);
+                alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
             }
         }
 
-        document.getElementById('btn-claude').addEventListener('click', () => submitVote('Claude Pro'));
-        document.getElementById('btn-gpt').addEventListener('click', () => submitVote('GPT Pro'));
-        document.getElementById('btn-gemini').addEventListener('click', () => submitVote('Gemini Advanced'));
+        // ============================================
+        // EVENT LISTENERS: Vote buttons
+        // ============================================
+        document.getElementById('btn-claude').addEventListener('click', () => submitVote('Claude (Anthropic)'));
+        document.getElementById('btn-gpt').addEventListener('click', () => submitVote('ChatGPT (OpenAI)'));
+        document.getElementById('btn-gemini').addEventListener('click', () => submitVote('Gemini (Google)'));
+
+        // ============================================
+        // FUNCTION: View results without voting
+        // ============================================
+        async function viewResults() {
+            document.getElementById('compare-section').classList.add('hidden');
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('vote-section').classList.add('hidden');
+            document.getElementById('success-section').classList.remove('hidden');
+            document.getElementById('voted-for').textContent = '-';
+            await fetchResults();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============================================
+        // EVENT LISTENERS: View results buttons
+        // ============================================
+        document.getElementById('btn-view-results').addEventListener('click', viewResults);
+        document.getElementById('btn-view-results-2').addEventListener('click', viewResults);
+
+        // ============================================
+        // EVENT LISTENER: Back to comparison table
+        // ============================================
+        document.getElementById('btn-back-to-compare').addEventListener('click', () => {
+            document.getElementById('success-section').classList.add('hidden');
+            document.getElementById('compare-section').classList.remove('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ============================================
+        // START THE APP
+        // ============================================
+        startApp();
     </script>
 </body>
 </html>
