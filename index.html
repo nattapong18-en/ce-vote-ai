@@ -43,7 +43,7 @@
             to { opacity: 1; transform: scale(1); }
         }
         
-        /* ปรับแต่ง Scrollbar สำหรับตารางข้อมูลเยอะๆ */
+        /* ปรับแต่ง Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -71,8 +71,8 @@
             <p class="text-slate-400 text-lg">เปรียบเทียบ AI แบบเจาะลึก ศึกษาสเปคก่อนตัดสินใจโหวตเครื่องมือของสาขาประจำปี</p>
         </div>
 
-        <!-- ตารางเปรียบเทียบเชิงลึก -->
-        <div class="glass-card rounded-2xl shadow-2xl overflow-hidden mb-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100">
+        <!-- ตารางเปรียบเทียบเชิงลึก (ซ่อนเมื่อเข้าสู่หน้าโหวต) -->
+        <div id="compare-section" class="glass-card rounded-2xl shadow-2xl overflow-hidden mb-16" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse text-sm sm:text-base min-w-[1000px]">
                     <thead>
@@ -84,8 +84,6 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-700/50">
-                        
-                        <!-- Core Engine -->
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="p-5 font-semibold text-slate-200">สถาปัตยกรรม & การคิดวิเคราะห์<br><span class="text-xs text-slate-500 font-normal">(Core Logic & Backend)</span></td>
                             <td class="p-5 text-slate-300">
@@ -98,8 +96,6 @@
                                 <strong>Gemini 1.5 Pro:</strong> สถาปัตยกรรม MoE (Mixture of Experts) ทำงานแบบคู่ขนานได้เร็ว ออกแบบมาเพื่อทำงานประสานกับ Cloud Infrastructure และสถาปัตยกรรม Microservices ขนาดใหญ่ได้ดี
                             </td>
                         </tr>
-
-                        <!-- Context Window -->
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="p-5 font-semibold text-slate-200">หน่วยความจำบริบท<br><span class="text-xs text-slate-500 font-normal">(Context Window & RAG)</span></td>
                             <td class="p-5 text-slate-300">
@@ -115,8 +111,6 @@
                                 พลังดึงข้อมูลโหดที่สุด โยน Source Code ทั้งโฟลเดอร์ หรือข้อมูล Log เครือข่าย (Network Traffic) เข้าไปให้มันกวาดหาสิ่งผิดปกติพร้อมกันทีเดียวได้สบายๆ
                             </td>
                         </tr>
-
-                        <!-- OS & CLI -->
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="p-5 font-semibold text-slate-200">สาย OS, System & CLI<br><span class="text-xs text-slate-500 font-normal">(Linux / Terminal / Network)</span></td>
                             <td class="p-5 text-slate-300">
@@ -129,8 +123,6 @@
                                 บูรณาการกับ <strong>Gemini Cloud Assist</strong> เก่งในการช่วยตั้งค่า Server, คอนฟิก Container, จัดการ Kubernetes และการเขียน Shell Script ที่อิงกับ Cloud
                             </td>
                         </tr>
-
-                        <!-- Security -->
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="p-5 font-semibold text-slate-200">สาย Cybersecurity<br><span class="text-xs text-slate-500 font-normal">(Vulnerability & SecOps)</span></td>
                             <td class="p-5 text-slate-300">
@@ -143,8 +135,6 @@
                                 ดึงข้อมูล Threat Intelligence จาก Google แบบ Real-time เก่งในการตรวจสอบรูปแบบของมัลแวร์ และเชื่อมข้อมูลกับเครื่องมือของ Google SecOps
                             </td>
                         </tr>
-
-                        <!-- UI/UX -->
                         <tr class="hover:bg-slate-800/40 transition-colors">
                             <td class="p-5 font-semibold text-slate-200">สายออกแบบ & Frontend<br><span class="text-xs text-slate-500 font-normal">(UI/UX & Graphics)</span></td>
                             <td class="p-5 text-slate-300">
@@ -162,17 +152,18 @@
             </div>
         </div>
 
-        <!-- ส่วนของฟอร์มล็อกอิน -->
+        <!-- ส่วนของฟอร์มล็อกอิน (ซ่อนเมื่อเข้าสู่หน้าโหวต) -->
         <div id="login-section" class="max-w-md mx-auto glass-card p-8 rounded-2xl" data-aos="zoom-in" data-aos-duration="800" data-aos-delay="200">
             <h2 class="text-2xl font-bold mb-6 text-center text-slate-100">ยืนยันตัวตนก่อนโหวต</h2>
             <form id="login-form" class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-slate-400 mb-1">ชื่อ - นามสกุล</label>
-                    <input type="text" id="name-input" required placeholder="นายวิศวะ คอมพิวเตอร์" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                    <input type="text" id="name-input" required placeholder="เช่น นายวิศวะ คอมพิวเตอร์" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-1">อีเมล (จำกัด 1 สิทธิ์ / 1 อีเมล)</label>
-                    <input type="email" id="email-input" required placeholder="student@example.com" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                    <label class="block text-sm font-medium text-slate-400 mb-1">รหัสนักศึกษา (จำกัด 1 สิทธิ์ / 1 รหัส)</label>
+                    <!-- เปลี่ยน Type เป็น text แต่ใส่ pattern ให้รับเฉพาะตัวเลข -->
+                    <input type="text" id="student-id-input" required pattern="[0-9]+" placeholder="เช่น 66xxxxxxxx" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-slate-200 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -200,34 +191,34 @@
             <p id="error-msg" class="text-red-400 text-sm mt-4 text-center hidden bg-red-900/20 p-2 rounded"></p>
         </div>
 
-        <!-- ส่วนของการโหวต -->
-        <div id="vote-section" class="hidden text-center fade-in-section">
+        <!-- ส่วนของการโหวต (เสมือนเป็นหน้าใหม่) -->
+        <div id="vote-section" class="hidden text-center fade-in-section max-w-4xl mx-auto mt-10">
             <h2 class="text-3xl font-bold mb-2 text-slate-100">สวัสดี <span id="display-name" class="text-blue-400"></span> (ปี <span id="display-year"></span>)</h2>
-            <p class="text-slate-400 mb-8">เครื่องมือใดตอบโจทย์สายงานและความถนัดของคุณมากที่สุด? (โหวตได้ 1 ครั้ง)</p>
+            <p class="text-slate-400 mb-12 text-lg">เครื่องมือใดตอบโจทย์สายงานและความถนัดของคุณมากที่สุด? <br><span class="text-sm text-red-400">(กรุณาตัดสินใจให้ดี โหวตได้เพียง 1 ครั้งเท่านั้น)</span></p>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Claude -->
-                <button id="btn-claude" class="group glass-card border border-slate-700 hover:border-purple-500 rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_-10px_rgba(168,85,247,0.4)] flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span class="text-3xl">🧠</span>
+                <button id="btn-claude" class="group glass-card border border-slate-700 hover:border-purple-500 rounded-3xl p-10 transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_15px_40px_-10px_rgba(168,85,247,0.5)] flex flex-col items-center">
+                    <div class="w-20 h-20 rounded-full bg-purple-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="text-4xl">🧠</span>
                     </div>
-                    <span class="text-xl font-bold text-slate-200 group-hover:text-purple-400 transition-colors">Claude Pro</span>
+                    <span class="text-2xl font-bold text-slate-200 group-hover:text-purple-400 transition-colors">Claude Pro</span>
                 </button>
                 
                 <!-- GPT -->
-                <button id="btn-gpt" class="group glass-card border border-slate-700 hover:border-emerald-500 rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.4)] flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-emerald-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span class="text-3xl">⚡</span>
+                <button id="btn-gpt" class="group glass-card border border-slate-700 hover:border-emerald-500 rounded-3xl p-10 transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_15px_40px_-10px_rgba(16,185,129,0.5)] flex flex-col items-center">
+                    <div class="w-20 h-20 rounded-full bg-emerald-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="text-4xl">⚡</span>
                     </div>
-                    <span class="text-xl font-bold text-slate-200 group-hover:text-emerald-400 transition-colors">GPT Pro</span>
+                    <span class="text-2xl font-bold text-slate-200 group-hover:text-emerald-400 transition-colors">GPT Pro</span>
                 </button>
 
                 <!-- Gemini -->
-                <button id="btn-gemini" class="group glass-card border border-slate-700 hover:border-blue-500 rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_10px_30px_-10px_rgba(59,130,246,0.4)] flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span class="text-3xl">✨</span>
+                <button id="btn-gemini" class="group glass-card border border-slate-700 hover:border-blue-500 rounded-3xl p-10 transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_15px_40px_-10px_rgba(59,130,246,0.5)] flex flex-col items-center">
+                    <div class="w-20 h-20 rounded-full bg-blue-900/30 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span class="text-4xl">✨</span>
                     </div>
-                    <span class="text-xl font-bold text-slate-200 group-hover:text-blue-400 transition-colors">Gemini Adv.</span>
+                    <span class="text-2xl font-bold text-slate-200 group-hover:text-blue-400 transition-colors">Gemini Adv.</span>
                 </button>
             </div>
         </div>
@@ -244,7 +235,7 @@
 
             <!-- กล่องแสดงผลคะแนนโหวตแบบกราฟแท่ง -->
             <div id="results-container" class="glass-card p-8 rounded-2xl hidden">
-                <h3 class="text-xl font-bold text-slate-200 mb-6 text-center">📊 ผลโหวตล่าสุด (Real-time)</h3>
+                <h3 class="text-xl font-bold text-slate-200 mb-6 text-center">📊 ผลโหวตของสาขาขณะนี้ (Real-time)</h3>
                 
                 <div class="space-y-6">
                     <!-- แท่ง Claude -->
@@ -280,7 +271,7 @@
                         </div>
                     </div>
                 </div>
-                <p class="text-center text-xs text-slate-500 mt-6 mt-4">ผู้ร่วมโหวตทั้งหมด: <span id="total-voters" class="font-bold">0</span> คน</p>
+                <p class="text-center text-xs text-slate-500 mt-6 mt-4">จำนวนวิศวกรที่ร่วมโหวตทั้งหมด: <span id="total-voters" class="font-bold text-slate-300">0</span> คน</p>
             </div>
         </div>
 
@@ -312,13 +303,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let currentUser = { fullName: '', email: '', nickname: '', year: '' };
+        let currentUser = { fullName: '', studentId: '', nickname: '', year: '' };
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const fullName = document.getElementById('name-input').value.trim();
-            const email = document.getElementById('email-input').value.trim();
+            const studentId = document.getElementById('student-id-input').value.trim();
             const nickname = document.getElementById('nick-input').value.trim();
             const year = document.getElementById('year-input').value;
             
@@ -331,20 +322,27 @@
             errorMsg.classList.add('hidden');
 
             try {
-                const q = query(collection(db, "votes"), where("email", "==", email));
+                // เช็คว่า "รหัสนักศึกษา" นี้เคยโหวตหรือยัง
+                const q = query(collection(db, "votes"), where("studentId", "==", studentId));
                 const querySnapshot = await getDocs(q);
 
                 if (!querySnapshot.empty) {
-                    errorMsg.textContent = "อีเมลนี้ได้ทำการโหวตไปแล้ว ไม่สามารถโหวตซ้ำได้ครับ!";
+                    errorMsg.textContent = "รหัสนักศึกษานี้ได้ทำการโหวตไปแล้ว ไม่สามารถโหวตซ้ำได้ครับ!";
                     errorMsg.classList.remove('hidden');
                 } else {
-                    currentUser = { fullName, email, nickname, year };
+                    currentUser = { fullName, studentId, nickname, year };
                     
                     document.getElementById('display-name').textContent = nickname;
                     document.getElementById('display-year').textContent = year;
                     
+                    // ทำการซ่อนตารางข้อมูลและฟอร์มล็อกอิน เพื่อให้รู้สึกเหมือนเข้าหน้าใหม่
+                    document.getElementById('compare-section').classList.add('hidden');
                     document.getElementById('login-section').classList.add('hidden');
+                    
+                    // โชว์หน้าปุ่มโหวต
                     document.getElementById('vote-section').classList.remove('hidden');
+                    
+                    // เลื่อนหน้าจอกลับไปบนสุดทันที
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             } catch (error) {
@@ -363,7 +361,6 @@
             resultsContainer.classList.remove('hidden');
             
             try {
-                // ดึงข้อมูลโหวตทั้งหมดมานับ
                 const querySnapshot = await getDocs(collection(db, "votes"));
                 let claudeVotes = 0, gptVotes = 0, geminiVotes = 0, totalVotes = 0;
 
@@ -377,15 +374,12 @@
 
                 document.getElementById('total-voters').textContent = totalVotes;
 
-                // ป้องกันการหารด้วยศูนย์
                 if (totalVotes === 0) return;
 
-                // คำนวณเปอร์เซ็นต์
                 const claudePercent = Math.round((claudeVotes / totalVotes) * 100);
                 const gptPercent = Math.round((gptVotes / totalVotes) * 100);
                 const geminiPercent = Math.round((geminiVotes / totalVotes) * 100);
 
-                // หน่วงเวลาเล็กน้อยให้ CSS Animation ทำงาน
                 setTimeout(() => {
                     document.getElementById('bar-claude').style.width = `${claudePercent}%`;
                     document.getElementById('score-claude').textContent = `${claudeVotes} โหวต (${claudePercent}%)`;
@@ -403,12 +397,13 @@
         }
 
         async function submitVote(aiChoice) {
-            if(!confirm(`ยืนยันโหวตให้ ${aiChoice} หรือไม่? (โหวตแล้วแก้ไม่ได้นะ)`)) return;
+            if(!confirm(`ยืนยันโหวตให้ ${aiChoice} หรือไม่? (ระบบจะบันทึกผลทันที)`)) return;
 
             try {
+                // บันทึกรหัสนักศึกษาลงฐานข้อมูลแทนอีเมล
                 await addDoc(collection(db, "votes"), {
                     fullName: currentUser.fullName,
-                    email: currentUser.email,
+                    studentId: currentUser.studentId,
                     nickname: currentUser.nickname,
                     year: currentUser.year,
                     choice: aiChoice,
@@ -417,12 +412,12 @@
 
                 document.getElementById('voted-for').textContent = aiChoice;
                 
+                // ซ่อนหน้าโหวต แล้วโชว์หน้าแสดงความสำเร็จ + กราฟผลโหวต
                 document.getElementById('vote-section').classList.add('hidden');
                 document.getElementById('success-section').classList.remove('hidden');
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // เรียกใช้ฟังก์ชันดึงผลโหวตมาโชว์
                 await fetchAndDisplayResults();
 
             } catch (error) {
